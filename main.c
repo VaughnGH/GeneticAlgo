@@ -2,5 +2,6 @@
 #include "genetics.h"
 
 int main(void) {
-    runTest();
+    //runTest();
+    popTest();
 }
