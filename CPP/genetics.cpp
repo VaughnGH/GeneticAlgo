@@ -1,42 +1,38 @@
+
 #include "genetics.h"
 
-extern unsigned char lfsr(unsigned char counter);  //import lfst.s file
-
-
-int randomCounter = 0;
-
-const unsigned int GOAL[GENE_SIZE] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,};  //goal genome sequence
-Individual population[POPULATION_SIZE];
+const unsigned int GOAL[GENE_SIZE] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,};
+OIndividual population[POPULATION_SIZE];
 
 void generatePopulation(){
     for (int i=0; i<POPULATION_SIZE; i++) {
-        population[i] = generateIndividual();
+        population[i] = generateOIndividual();
     }
 }
 
-Individual generateIndividual(){
-    Individual indiv;
+OIndividual generateOIndividual(){
+    OIndividual indiv;
     for (int i = 0; i < GENE_SIZE; i++) {
-            indiv.genes[i] = round(RANDOM());
+        indiv.genes[i] = round(RANDOM());
     }
     return indiv;
 }
 
-void mutate(Individual *indiv){  //chance of gene mutation based on MUTATION_RATE
+void mutate(OIndividual *indiv){
     for (int i = 0; i < GENE_SIZE; i++) {
         if (RANDOM() <= MUTATION_RATE) {
             indiv->genes[i] = round(RANDOM());
         }
     }
 }
-Individual crossover(Individual parentOne, Individual parentTwo) {  //combine two parents into offspring
-    Individual child;
+OIndividual crossover(OIndividual parentOne, OIndividual parentTwo) {
+    OIndividual child;
     for (int i = 0; i < GENE_SIZE; i++) {
         child.genes[i] = (RANDOM() <= UNIFORM_RATE) ? parentOne.genes[i] : parentTwo.genes[i];
     }
     return child;
 }
-int setFitness(Individual *indiv) {  //Test indiv for fitness
+int setFitness(OIndividual *indiv) {
     indiv->fitness = 0;
     for (int i = 0; i < GENE_SIZE; i++) {
         if (indiv->genes[i] == GOAL[i]) {
@@ -45,17 +41,17 @@ int setFitness(Individual *indiv) {  //Test indiv for fitness
     }
     return indiv->fitness;
 }
-int getFitness(Individual indiv) {
+int getFitness(OIndividual indiv) {
     return setFitness(&indiv);
 }
-void printGenes(Individual indiv){
+void printGenes(OIndividual indiv){
     for (int i = 0; i < GENE_SIZE; i++) {
         printf("%d", indiv.genes[i]);
     }
 }
 
-void evolvePopulation(){  //get new, fit, pool of individuals
-    Individual fittest = getFittest();
+void evolvePopulation(){
+    OIndividual fittest = getFittest();
     for (int i=0; i<POPULATION_SIZE; i++) {
         population[i] = crossover(fittest, microSelection(16));
         mutate(&population[i]);
@@ -63,9 +59,9 @@ void evolvePopulation(){  //get new, fit, pool of individuals
     
 }
 
-Individual getFittest() {
-    Individual fittest = population[0];
-    Individual newest;
+OIndividual getFittest() {
+    OIndividual fittest = population[0];
+    OIndividual newest;
     for (int i = 1; i<POPULATION_SIZE; i++) {
         newest = population[i];
         if (setFitness(&newest) >= setFitness(&fittest)) {
@@ -76,16 +72,16 @@ Individual getFittest() {
 }
 
 
-Individual tournamentSelection(int tournamentSize){  //deprecated
-    return generateIndividual();
+OIndividual tournamentSelection(int tournamentSize){
+    return generateOIndividual();
 }
 
 
-Individual microSelection(int tournamentSize){  //mini competetion pool of fittest, random, indiv's
-    Individual fittest = generateIndividual();
-    Individual newest;
+OIndividual microSelection(int tournamentSize){
+    OIndividual fittest = generateOIndividual();
+    OIndividual newest;
     for (int i = 0; i<tournamentSize; i++) {
-        newest = generateIndividual();
+        newest = generateOIndividual();
         if (setFitness(&newest) >= setFitness(&fittest)) {
             fittest = newest;
         }
@@ -98,9 +94,9 @@ void runTest(){
      //const unsigned int GOAL[GENE_SIZE] = {1,1,0,0,1,0,1,0};
      printf("%d", GOAL[i]);
      }*/
-    Individual indiv;
+    OIndividual indiv;
     for (int i = 0; i<100; i++) {
-        indiv = generateIndividual();
+        indiv = generateOIndividual();
         //if (getFitness(&indiv) == GENE_SIZE) {
         //    printf("%d", i);
         //    break;
@@ -126,24 +122,4 @@ void popTest(){
             evolvePopulation();
         }
     }
-}
-
-/*
-int assembly_lfsr(){  //Get assembly-lfsr rand val
-    return lfsr(++randomCounter);
-};*/
-
-int c_lfsr() {  //Get c-lfsr rand val
-    int count = ++randomCounter;
-    count = (count%65536) ? (count%65536) : ((count%65536) + 1);
-    uint16_t lfsr = 0xFEED;
-    uint16_t bit;
-    int counter = 0;
-    do
-    {
-        bit  = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5) ) & 1;
-        lfsr =  (lfsr >> 1) | (bit << 15);
-        counter++;
-    } while (count != counter);
-    return lfsr;
 }

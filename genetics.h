@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#define MUTATION_RATE .015  //MutationRate * GeneSize == chance of mutation in individual
+#define MUTATION_RATE .017  //MutationRate * GeneSize == chance of mutation in individual
 #define GENE_SIZE 32
-#define UNIFORM_RATE .7
+#define UNIFORM_RATE .8
 #define POPULATION_SIZE 8
-#define RANDOM() ((double)rand() / (double)RAND_MAX)
+#define DEFAULT_RANDOM() ((double)rand() / (double)RAND_MAX)
+#define RANDOM() ((double) c_lfsr() / (double) 65535)
+#define ASSEMB_RANDOM() ((double) assembly_lfsr() / (double) 65535)
+
 
 struct individual {
     unsigned int genes[GENE_SIZE];
@@ -33,7 +36,8 @@ Individual microSelection(int tournamentSize);
 void evolvePopulation();
 void popTest();
 
-
+int c_lfsr();
+int assembly_lfsr();
 
 void runTest();
 
